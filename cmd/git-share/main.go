@@ -16,6 +16,15 @@ func exit(err error) {
 	os.Exit(1)
 }
 
+// run runs the given command with stdout and stderr mapped to this process
+func run(program string, args ...string) error {
+	cmd := exec.Command(program, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
+}
+
 // head returns the current head for the repo
 func head() string {
 	headRef, headErr := exec.Command(
@@ -66,7 +75,7 @@ func changes() int {
 
 func main() {
 	if len(os.Args) < 3 {
-		fmt.Println("Usage: git pr [name] [rev]")
+		fmt.Println("Usage: git share [name] [rev]")
 		os.Exit(1)
 	}
 
@@ -77,96 +86,72 @@ func main() {
 	changeCount := changes()
 
 	if changeCount > 0 {
-		fmt.Println("Cannot continue: You have pending changes")
+		fmt.Println("Cannot continue: pending changes")
 		os.Exit(1)
 	}
 
 	// create the new branch
-	branchCmd := exec.Command(
+	branchErr := run(
 		"git",
 		"branch",
 		name,
 		"origin/master",
 		"--no-track",
 	)
-	branchCmd.Stdout = os.Stdout
-	branchCmd.Stderr = os.Stderr
-
-	branchErr := branchCmd.Run()
 	if branchErr != nil {
 		os.Exit(1)
 	}
 
 	// check out the new branch
-	checkoutCmd := exec.Command(
+	checkoutErr := run(
 		"git",
 		"checkout",
 		"-q",
 		name,
 	)
-	checkoutCmd.Stdout = os.Stdout
-	checkoutCmd.Stderr = os.Stderr
-
-	checkoutErr := checkoutCmd.Run()
 	if checkoutErr != nil {
 		os.Exit(1)
 	}
 
 	// cherry pick
-	cherrypickCmd := exec.Command(
+	cherrypickErr := run(
 		"git",
 		"cherry-pick",
 		rev,
 	)
-	cherrypickCmd.Stdout = os.Stdout
-	cherrypickCmd.Stderr = os.Stderr
-
-	cherrypickErr := cherrypickCmd.Run()
 	if cherrypickErr != nil {
 		os.Exit(1)
 	}
 
 	// push
-	pushCmd := exec.Command(
+	pushErr := run(
 		"git",
 		"push",
 		"origin",
 		name,
 	)
-	pushCmd.Stdout = os.Stdout
-	pushCmd.Stderr = os.Stderr
-
-	pushErr := pushCmd.Run()
 	if pushErr != nil {
 		os.Exit(1)
 	}
 
 	// check out original head
-	checkoutOrigCmd := exec.Command(
+	checkoutOrigErr := run(
 		"git",
 		"checkout",
 		"-q",
 		headRev,
 	)
-	checkoutOrigCmd.Stdout = os.Stdout
-	checkoutOrigCmd.Stderr = os.Stderr
-
-	checkoutOrigErr := checkoutOrigCmd.Run()
 	if checkoutOrigErr != nil {
 		os.Exit(1)
 	}
 
 	// delete the branch that was created
-	deleteBranchCmd := exec.Command(
+	deleteBranchErr := run(
 		"git",
 		"branch",
 		"-D",
 		name,
 	)
-	deleteBranchCmd.Stdout = os.Stdout
-	deleteBranchCmd.Stderr = os.Stderr
-
-	deleteBranchErr := deleteBranchCmd.Run()
 	if deleteBranchErr != nil {
 		os.Exit(1)
 	}
