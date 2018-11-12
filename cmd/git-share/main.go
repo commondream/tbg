@@ -73,7 +73,24 @@ func changes() int {
 	return count
 }
 
+// isRef returns whether or not the ref exists
+func isRef(ref string) bool {
+	refErr := exec.Command(
+		"git",
+		"show-ref",
+		ref,
+	).Run()
+
+	if refErr != nil {
+		return false
+	}
+
+	return true
+}
+
 func main() {
+	fmt.Println("...")
+
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: git share [name] [rev]")
 		os.Exit(1)
@@ -90,19 +107,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	// create the new branch
-	fmt.Printf("* Creating share branch %s\n", name)
-	branchErr := run(
-		"git",
-		"branch",
-		name,
-		"origin/master",
-		"--no-track",
-	)
-	if branchErr != nil {
-		os.Exit(1)
+	if !isRef(fmt.Sprintf("origin/%s", name)) {
+		// create the new branch
+		fmt.Printf("* Creating share branch %s\n", name)
+		branchErr := run(
+			"git",
+			"branch",
+			name,
+			"origin/master",
+			"--no-track",
+		)
+		if branchErr != nil {
+			os.Exit(1)
+		}
+		fmt.Println()
 	}
-	fmt.Println()
 
 	// check out the new branch
 	fmt.Printf("*  Checking out %s\n", name)
