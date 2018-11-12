@@ -10,7 +10,7 @@ your team doesn't.
 ## Installation
 
 ```
-go get -u https://github.com/commondream/tbg/...
+go get -u github.com/commondream/tbg/...
 ```
 
 ## License
