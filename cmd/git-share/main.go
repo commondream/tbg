@@ -91,6 +91,7 @@ func main() {
 	}
 
 	// create the new branch
+	fmt.Printf("* Creating share branch %s\n", name)
 	branchErr := run(
 		"git",
 		"branch",
@@ -101,8 +102,10 @@ func main() {
 	if branchErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 
 	// check out the new branch
+	fmt.Printf("*  Checking out %s\n", name)
 	checkoutErr := run(
 		"git",
 		"checkout",
@@ -112,8 +115,10 @@ func main() {
 	if checkoutErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 
 	// cherry pick
+	fmt.Printf("* Picking %s onto %s\n", rev, name)
 	cherrypickErr := run(
 		"git",
 		"cherry-pick",
@@ -122,8 +127,10 @@ func main() {
 	if cherrypickErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 
 	// push
+	fmt.Printf("* Pushing %s\n", name)
 	pushErr := run(
 		"git",
 		"push",
@@ -133,8 +140,10 @@ func main() {
 	if pushErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 
 	// check out original head
+	fmt.Printf("* Back to %s\n", headRev)
 	checkoutOrigErr := run(
 		"git",
 		"checkout",
@@ -144,8 +153,10 @@ func main() {
 	if checkoutOrigErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 
 	// delete the branch that was created
+	fmt.Printf("* Deleting %s\n", name)
 	deleteBranchErr := run(
 		"git",
 		"branch",
@@ -155,4 +166,5 @@ func main() {
 	if deleteBranchErr != nil {
 		os.Exit(1)
 	}
+	fmt.Println()
 }
