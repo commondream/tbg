@@ -5,7 +5,8 @@ your team doesn't.
 
 ## Commands
 
-`git unmerged` - list commits on `master` that aren't on `origin/master`
+- `git unmerged` lists commits on `master` that aren't on `origin/master`
+- `git share` pushes a particular commit to a remote branch for review
 
 ## Installation
 
