@@ -88,6 +88,20 @@ func isRef(ref string) bool {
 	return true
 }
 
+func revParse(rev string) string {
+	revParseOut, revParseErr := exec.Command(
+		"git",
+		"rev-parse",
+		rev,
+	).Output()
+
+	if revParseErr != nil {
+		exit(revParseErr)
+	}
+
+	return string(strings.TrimSpace(string(revParseOut)))
+}
+
 func main() {
 	fmt.Println("...")
 
@@ -106,6 +120,9 @@ func main() {
 		fmt.Println("Cannot continue: pending changes")
 		os.Exit(1)
 	}
+
+	// rev-parse the rev param so things like HEAD are possible
+	revParsed := revParse(rev)
 
 	if !isRef(fmt.Sprintf("origin/%s", name)) {
 		// create the new branch
@@ -137,11 +154,11 @@ func main() {
 	fmt.Println()
 
 	// cherry pick
-	fmt.Printf("* Picking %s onto %s\n", rev, name)
+	fmt.Printf("* Picking %s onto %s\n", revParsed, name)
 	cherrypickErr := run(
 		"git",
 		"cherry-pick",
-		rev,
+		revParsed,
 	)
 	if cherrypickErr != nil {
 		os.Exit(1)
