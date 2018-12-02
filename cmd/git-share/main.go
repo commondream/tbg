@@ -102,9 +102,36 @@ func revParse(rev string) string {
 	return string(strings.TrimSpace(string(revParseOut)))
 }
 
-func main() {
-	fmt.Println("...")
+func cleanup(headRev, name string) {
+	// check out original head
+	fmt.Printf("* Back to %s\n", headRev)
+	checkoutOrigErr := run(
+		"git",
+		"checkout",
+		"-q",
+		"--force",
+		headRev,
+	)
+	if checkoutOrigErr != nil {
+		os.Exit(1)
+	}
+	fmt.Println()
 
+	// delete the branch that was created
+	fmt.Printf("* Deleting %s\n", name)
+	deleteBranchErr := run(
+		"git",
+		"branch",
+		"-D",
+		name,
+	)
+	if deleteBranchErr != nil {
+		os.Exit(1)
+	}
+	fmt.Println()
+}
+
+func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: git share [name] [rev]")
 		os.Exit(1)
@@ -140,6 +167,9 @@ func main() {
 		fmt.Println()
 	}
 
+	// Make sure everything cleans up at the end
+	defer cleanup(headRev, name)
+
 	// check out the new branch
 	fmt.Printf("*  Checking out %s\n", name)
 	checkoutErr := run(
@@ -149,7 +179,8 @@ func main() {
 		name,
 	)
 	if checkoutErr != nil {
-		os.Exit(1)
+		defer os.Exit(1)
+		return
 	}
 	fmt.Println()
 
@@ -161,7 +192,8 @@ func main() {
 		revParsed,
 	)
 	if cherrypickErr != nil {
-		os.Exit(1)
+		defer os.Exit(1)
+		return
 	}
 	fmt.Println()
 
@@ -174,33 +206,8 @@ func main() {
 		name,
 	)
 	if pushErr != nil {
-		os.Exit(1)
-	}
-	fmt.Println()
-
-	// check out original head
-	fmt.Printf("* Back to %s\n", headRev)
-	checkoutOrigErr := run(
-		"git",
-		"checkout",
-		"-q",
-		headRev,
-	)
-	if checkoutOrigErr != nil {
-		os.Exit(1)
-	}
-	fmt.Println()
-
-	// delete the branch that was created
-	fmt.Printf("* Deleting %s\n", name)
-	deleteBranchErr := run(
-		"git",
-		"branch",
-		"-D",
-		name,
-	)
-	if deleteBranchErr != nil {
-		os.Exit(1)
+		defer os.Exit(1)
+		return
 	}
 	fmt.Println()
 }
