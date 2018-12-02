@@ -5,8 +5,23 @@ your team doesn't.
 
 ## Commands
 
-- `git unmerged` lists commits on `master` that aren't on `origin/master`
-- `git share` pushes a particular commit to a remote branch for review
+### git unmerged
+
+`git unmerged` lists commits on `master` that aren't on `origin/master`
+
+It doesn't take any arguments and is a really simple wrapper for running `git logmaster ^origin/master --no-merges --pretty=oneline --abbrev-commit`.
+
+### git share [branch] [rev]
+
+`git share` pushes a particular commit to a remote branch for review
+
+It does take arguments - the branch to push to and the commits to add. For example, running:
+
+`git share new-feature HEAD` would add the `HEAD` commit to a new remote branch named `new-feature`.
+
+`git share` does take all of the interesting shortcuts in commit names that git has to offer (like `HEAD`) by using `git rev-parse` to figure out the commit argument.
+
+The command also handles subsequent runs by appending subsequent revs to the branch name given. This is handy when you get feedback during a review and need to modify your changes.
 
 ## Installation
 
